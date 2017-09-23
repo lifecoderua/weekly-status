@@ -7,8 +7,9 @@ package app
 
 // SlackEvent ...
 type SlackEvent struct {
-	Type  string
-	Token string
-	User  string
-	Text  string
+	Type      string
+	Challenge string
+	Token     string
+	User      string
+	Text      string
 }

@@ -30,7 +30,7 @@ func routeEvent(w http.ResponseWriter, r *http.Request, event SlackEvent) {
 	log.Printf("Daily payload: %s", event)
 	switch event.Type {
 	case "url_verification":
-		fmt.Fprintf(w, "%s", event.Token)
+		fmt.Fprintf(w, "%s", event.Challenge)
 	default:
 		log.Print("something mundane happened")
 		log.Printf("Text received:\n %s\n", event.Text)
