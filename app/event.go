@@ -11,5 +11,9 @@ type SlackEvent struct {
 	Challenge string
 	Token     string
 	User      string
-	Text      string
+	Event     event
+}
+
+type event struct {
+	Text string
 }
