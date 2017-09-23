@@ -48,5 +48,5 @@ func main() {
 	log.Printf("Bot token: %s", os.Getenv("BOT_TOKEN"))
 
 	http.HandleFunc("/", route)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }
