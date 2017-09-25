@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
+
+	"weekly-status/slack"
 )
 
 // os.Getenv("BOT_TOKEN")
@@ -33,6 +36,21 @@ func routeEvent(w http.ResponseWriter, r *http.Request, event SlackEvent) {
 		fmt.Fprintf(w, "%s", event.Challenge)
 	case "event_callback":
 		log.Printf("Event with text received:\n %s\n", event.Event.Text)
+		now := time.Now()
+		isMonday := now.Weekday() == time.Monday
+		DEBUG := true
+		if DEBUG || isMonday {
+			// isDailyReport :=
+			// isWeeklyReport :=
+			// default: ignore
+			log.Printf("I am Monday, ask user or proxy his reply!")
+
+			if event.Event.Text == "Log me" {
+				recipient := "U69C2NL7N"
+				message := "Thank you for debugging me"
+				go slack.Message(recipient, message)
+			}
+		}
 	default:
 		log.Printf("!! Unexpected event type %s", event.Type)
 	}
