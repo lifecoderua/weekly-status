@@ -3,6 +3,7 @@ package slack
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -17,26 +18,38 @@ type slackPayload struct {
 	token   string
 	channel string
 	text    string
+	user    string
 	asUser  bool
 }
 
-// TODO: Getter or a clean way to use same space for channels and groups
 // ChannelInfo know information about your channel
+// TODO: Getter or a clean way to use same space for channels and groups
 type ChannelInfo struct {
 	Group ChannelInfoGroup
 }
 
 // ChannelInfoGroup know information about your channel Group
 type ChannelInfoGroup struct {
-	id      string
-	name    string
-	members []string
+	ID      string
+	Name    string
+	Members []string
+}
+
+// MemberWrap is a chat user wrapper
+type MemberWrap struct {
+	User Member
+}
+
+// Member is a chat user
+type Member struct {
+	ID    string
+	Name  string
+	IsBot bool `json:"is_bot"`
 }
 
 // Message recipient
 func Message(channel string, message string) {
 	log.Print("MSG<><><>")
-	// run("chat.postMessage", channel, message)
 	run("chat.postMessage", slackPayload{channel: channel, text: message})
 }
 
@@ -49,8 +62,24 @@ func GetChannelMembers(channel string) ChannelInfo {
 	}
 
 	res := run(endpoint, slackPayload{channel: channel})
-	json.NewDecoder(res.Body).Decode(&info)
+
+	errx := json.NewDecoder(res.Body).Decode(&info)
+	log.Printf("%s )) %s", errx, info)
+
+	mem0 := getMemberInfo(info.Group.Members[0])
+	log.Printf("%s << ", mem0)
 	return info
+}
+
+func getMemberInfo(user string) Member {
+	var info MemberWrap
+
+	res := run("users.info", slackPayload{user: user})
+	body, _ := ioutil.ReadAll(res.Body)
+	log.Printf("%s, %s", user, body)
+	errx := json.NewDecoder(res.Body).Decode(&info)
+	log.Printf("%s )) %s", errx, info.User)
+	return info.User
 }
 
 // def room_members(channel)
@@ -62,22 +91,29 @@ func GetChannelMembers(channel string) ChannelInfo {
 // end
 
 // func run(endpoint string, channel string, text string) {
-func run(endpoint string, payload slackPayload) *http.Response {
+// func run(endpoint string, payload slackPayload) *http.Response {
+func run(endpoint string, payload map[string][]string) *http.Response {
 	uri := api + endpoint
 
+	payload["token"] = token()
+	payload["as_user"] = "true"
+
 	resp, err := http.PostForm(uri,
-		url.Values{
-			"token":   {token()},
-			"channel": {payload.channel},
-			"text":    {payload.text},
-			"as_user": {"true"}})
+		url.Values(payload))
+
+	// resp, err := http.PostForm(uri,
+	// 	url.Values{
+	// 		"token":   {token()},
+	// 		"channel": {payload.channel},
+	// 		"text":    {payload.text},
+	// 		"as_user": {"true"}})
 
 	if nil != err {
 		fmt.Println("errorination happened reading the body", err)
 		return &http.Response{}
 	}
 
-	defer resp.Body.Close()
+	// defer resp.Body.Close()
 
 	return resp
 }
