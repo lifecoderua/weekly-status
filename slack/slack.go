@@ -91,22 +91,23 @@ func getMemberInfo(user string) Member {
 // end
 
 // func run(endpoint string, channel string, text string) {
-// func run(endpoint string, payload slackPayload) *http.Response {
-func run(endpoint string, payload map[string][]string) *http.Response {
+func run(endpoint string, payload slackPayload) *http.Response {
+	// func run(endpoint string, payload map[string][]string) *http.Response {
 	uri := api + endpoint
 
-	payload["token"] = token()
-	payload["as_user"] = "true"
-
-	resp, err := http.PostForm(uri,
-		url.Values(payload))
+	// payload["token"] = token()
+	// payload["as_user"] = "true"
 
 	// resp, err := http.PostForm(uri,
-	// 	url.Values{
-	// 		"token":   {token()},
-	// 		"channel": {payload.channel},
-	// 		"text":    {payload.text},
-	// 		"as_user": {"true"}})
+	// url.Values(payload))
+
+	resp, err := http.PostForm(uri,
+		url.Values{
+			"token":   {token()},
+			"channel": {payload.channel},
+			"text":    {payload.text},
+			"user":    {payload.user},
+			"as_user": {"true"}})
 
 	if nil != err {
 		fmt.Println("errorination happened reading the body", err)
